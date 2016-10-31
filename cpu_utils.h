@@ -76,10 +76,8 @@ char *divBinary(char *left, char *right, char **remainder, int size, int setFlag
 char *addImmBinary(char *opLeft, char *opRight, int size, int setFlags);
 
 //todo add JAL
-//todo add B
 //todo add BNE
 //todo add BEQ
-//todo add BLT
 //todo add SRA
 //todo add SLL
 //todo add MOVE
