@@ -681,7 +681,7 @@ void runProgram(EXEC_INFO info){
     strcpy(PC, freeHandle = decimalToBinary(TEXT_SEGMENT, PC_SIZE));
     free(freeHandle);
 
-    int memLoc = 0, rdOffset = 0, rsOffset = 0, rtOffset = 0, immOffset = 0, addr = 0;
+    int memLoc = 0, immOffset = 0, addr = 0;
     char *result;
 
     for(int i = 0; i < info.lines; i++) {
@@ -705,8 +705,8 @@ void runProgram(EXEC_INFO info){
         // $t = MEM[$s + offset]
         if (strncmp(LW, instr, OPCODE_SIZE) == 0) { //LOAD WORD
             printf("instr %s\n", instr);
-            rsOffset = OPCODE_SIZE;
-            rtOffset = OPCODE_SIZE + REG_ADDR_SIZE;
+            int rsOffset = OPCODE_SIZE;
+            int rtOffset = OPCODE_SIZE + REG_ADDR_SIZE;
             immOffset = rtOffset + REG_ADDR_SIZE;
 
             //get register addresses and offset value from instruction memory
@@ -726,8 +726,8 @@ void runProgram(EXEC_INFO info){
             strcpy(regFile[binaryToDecimal(rt, REG_ADDR_SIZE)], memData);
 
         } else if (strncmp(SW, instr, OPCODE_SIZE) == 0) { //MEM[$s + offset] = $t STORE WORD
-            rsOffset = OPCODE_SIZE;
-            rtOffset = OPCODE_SIZE + REG_ADDR_SIZE;
+            int rsOffset = OPCODE_SIZE;
+            int rtOffset = OPCODE_SIZE + REG_ADDR_SIZE;
             immOffset = rtOffset + REG_ADDR_SIZE;
 
             //get register addresses and offset value from instruction memory
@@ -747,7 +747,7 @@ void runProgram(EXEC_INFO info){
         } else if (strncmp(LD, instr, OPCODE_SIZE) == 0) { //LOAD using general address mode
 
             // $reg, distance(base, index, scale) 5 7 5 5 4
-            rdOffset = OPCODE_SIZE;
+            int rdOffset = OPCODE_SIZE;
             int distanceOffset = OPCODE_SIZE + REG_ADDR_SIZE;
             int baseOffset = distanceOffset + DIST_SIZE;
             int indexOffset = baseOffset + REG_ADDR_SIZE;
@@ -827,9 +827,9 @@ void runProgram(EXEC_INFO info){
 
         } else if (strncmp(SUB, instr, OPCODE_SIZE) == 0) { //SUBTRACT INSTRUCTION
 
-            rdOffset = OPCODE_SIZE;
-            rsOffset = rdOffset + RTYPE_RD_SIZE;
-            rtOffset = rsOffset + RTYPE_ADDR_SIZE;
+            int rdOffset = OPCODE_SIZE;
+            int rsOffset = rdOffset + RTYPE_RD_SIZE;
+            int rtOffset = rsOffset + RTYPE_ADDR_SIZE;
 
             //get register addresses and offset value from instruction memory
             strncpy(rd, instr + rdOffset, RTYPE_RD_SIZE);
@@ -849,9 +849,9 @@ void runProgram(EXEC_INFO info){
             strcpy(regFile[binaryToDecimal(rd, REG_ADDR_SIZE)], result);
         }else if((strncmp(ADD, instr, OPCODE_SIZE) == 0)) { //ADD INSTRUCTION
 
-            rdOffset = OPCODE_SIZE;
-            rsOffset = rdOffset + RTYPE_RD_SIZE;
-            rtOffset = rsOffset + RTYPE_ADDR_SIZE;
+            int rdOffset = OPCODE_SIZE;
+            int rsOffset = rdOffset + RTYPE_RD_SIZE;
+            int rtOffset = rsOffset + RTYPE_ADDR_SIZE;
 
             //get register addresses and offset value from instruction memory
             strncpy(rd, instr + rdOffset, RTYPE_RD_SIZE);
@@ -1260,10 +1260,10 @@ char *buildInstrForBranchTypePrint(char *instr, char *instrName) {
 
     printf("instruction in print %s\n", instr);
 
-    for(int i = 0; i < LABEL_MAX; i++){
+    for(unsigned int i = 0; i < LABEL_MAX; i++){
         if((labels[i].labelName != NULL)) {
             printf("label is %s %s %d\n", labels[i].labelName, instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, IMM_SIZE));
-            for(int j = 0; j < 15; j++) {
+            for(unsigned int j = 0; j < 15; j++) {
                 if(labels[i].offsets[j] == signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, IMM_SIZE)){
                     strcpy(label, labels[i].labelName);
                     break;
