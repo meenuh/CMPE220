@@ -59,6 +59,8 @@ extern char memData[WORD_SIZE + 1];
 extern char instrReg[WORD_SIZE + 1];
 extern char flags[WORD_SIZE + 1];
 
+extern char returnAddr[PC_SIZE + 1];
+
 extern LABEL_INFO labels[5];
 
 //execution functions

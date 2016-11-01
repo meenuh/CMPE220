@@ -18,6 +18,7 @@ char flags[WORD_SIZE + 1];
 
 char *memory[MEM_ROWS]; //64kb mem
 char *regFile[NUM_REG];
+char returnAddr[PC_SIZE + 1];
 
 LABEL_INFO labels[5];
 
@@ -77,6 +78,7 @@ void init() {
     memAddr[WORD_SIZE] = '\0';
     memData[WORD_SIZE] = '\0';
     instrReg[WORD_SIZE] = '\0';
+    returnAddr[PC_SIZE] = '\0';
 
     for(int i = 0; i < WORD_SIZE; i++) {
         flags[i] = '0';
