@@ -42,12 +42,25 @@ int main(int argc, char **argv)
     init();
 
     //for testing
-    strcpy(memory[HEAP_SEGMENT + 1], "00000000000000000000000000000010");
-    strcpy(memory[802], "00000000000000000000000000001110");
+//    7 - SP
+//    6 - RA
+//    5 - last address - a2
+//    4 - first addr  - a1
+//    3 - v0
+//    2- t0
+//    1 - a0 value to search for
+    //5
+    strcpy(memory[HEAP_SEGMENT], "00000000000000000000000000000010");
+    strcpy(memory[HEAP_SEGMENT + 1], "00000000000000000000000000000110");
+    strcpy(memory[HEAP_SEGMENT + 2], "00000000000000000000000000000111");
+    strcpy(memory[HEAP_SEGMENT + 3], "00000000000000000000000000001001");
+    strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
 
-    strcpy(regFile[6], "00000000000000000000000000000111");
-    strcpy(regFile[1], "11111111111111111111111111111111");
-    strcpy(regFile[3], "00000000000000000000000001100100");
+    strcpy(regFile[7], "00000000000000001111100111111111"); //SP
+    strcpy(regFile[5], "00000000000000000000001010011010");
+    strcpy(regFile[4], "00000000000000000000001010010101");
+    strcpy(regFile[1], "00000000000000000000000000000110");
+
 
     EXEC_INFO info = initCPU(PC); //need to init the PC
     sourceCode = checkAndGetArg(argc, argv);
@@ -74,7 +87,7 @@ char *checkAndGetArg(int argc, char **arg){
 void init() {
 
     flags[WORD_SIZE] = '\0';
-    PC[WORD_SIZE] = '\0';
+    PC[PC_SIZE] = '\0';
     memAddr[WORD_SIZE] = '\0';
     memData[WORD_SIZE] = '\0';
     instrReg[WORD_SIZE] = '\0';
@@ -101,8 +114,9 @@ void init() {
         regFile[row][WORD_SIZE] = '\0';
     }
 
-    for(int i = 0; i < 5; i++){
+    for(int i = 0; i < LABEL_MAX; i++){
         labels[i].labelName = NULL;
+        labels[i].offsets[i] = 0;
     }
 }
 

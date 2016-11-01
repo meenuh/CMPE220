@@ -5,6 +5,8 @@
 #ifndef DESIGN_ISA_EXEC_UTILS_H
 #define DESIGN_ISA_EXEC_UTILS_H
 
+#include "cpu_utils.h"
+
 typedef struct exec_info{
     int heap_ptr;
     int stack_ptr;
@@ -13,7 +15,7 @@ typedef struct exec_info{
 
 typedef struct label_info{
     int lineNum;
-    int offset;
+    int offsets[15];
     char *labelName;
 }LABEL_INFO;
 

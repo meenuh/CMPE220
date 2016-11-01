@@ -11,8 +11,12 @@ const char *SW = "101011";
 const char *LD = "100010";
 const char *ST = "100100";
 const char *ADDI = "100101";
+const char *DIVI = "100110";
+const char *SUBI = "101001";
 
 const char *BLT = "100110";
+const char *BEQ = "100111";
+const char *BNE = "101000";
 
 //R Types and functions
 const char *ADD = "000001";

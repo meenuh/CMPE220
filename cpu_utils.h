@@ -18,6 +18,7 @@
 #define SCALE_SIZE 4
 #define RTYPE_RD_SIZE 10
 #define JTA_SIZE 26
+#define LABEL_MAX 15
 
 //memory start addresses
 #define TEXT_SEGMENT 512    //where text segment begins
@@ -77,12 +78,6 @@ char *modBinary(char *left, char *right, int size, int setFlags);
 char *divBinary(char *left, char *right, char **remainder, int size, int setFlags);
 char *addImmBinary(char *opLeft, char *opRight, int size, int setFlags);
 
-//todo add JAL
-//todo add BNE
-//todo add BEQ
-//todo add SRA
-//todo add SLL
-//todo add MOVE
 //todo add LEA
 
 char *leftShift(char* input, int size);
@@ -108,6 +103,7 @@ void printExecutionData(int instrNum);
 void mallocErrorCheck(char *ptr);
 char *buildInstrForRTypePrint(char *instr, char *instrName);
 char *buildInstrForITypePrint(char *instr, char *instrName);
+char *buildInstrForBranchTypePrint(char *instr, char *instrName);
 void preprocessFile(FILE *fp);
 
 #endif //DESIGN_ISA_CPU_UTILS_H
