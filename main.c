@@ -30,13 +30,13 @@ int main(int argc, char **argv)
     for(int i = 0; i < MEM_ROWS; i++){
         memory[i] = malloc(sizeof(char) * WORD_SIZE + 1);
         if(memory[i] == NULL)
-            exit;
+            exit(1);
     }
 
     for(int i = 0; i < NUM_REG; i++) {
         regFile[i] = (char *)malloc(sizeof(char) * WORD_SIZE + 1);
         if(regFile[i] == NULL)
-            exit;
+            exit(1);
     }
 
     init();
@@ -76,7 +76,7 @@ char *checkAndGetArg(int argc, char **arg){
 
     if(argc > 2) {
         printf("Incorrect number of arguments. File is required\n");
-        exit;
+        exit(1);
     }
 
     file = (char *)malloc(sizeof(char) * strlen(arg[1]) + 1);
@@ -93,31 +93,34 @@ void init() {
     instrReg[WORD_SIZE] = '\0';
     returnAddr[PC_SIZE] = '\0';
 
-    for(int i = 0; i < WORD_SIZE; i++) {
+    for(unsigned int i = 0; i < WORD_SIZE; i++) {
         flags[i] = '0';
         memAddr[i] = '0';
         memData[i] = '0';
         instrReg[i] = '0';
     }
 
-    for(int row = 0; row < MEM_ROWS; row++){
-        for(int col = 0; col < WORD_SIZE; col++){
+    for(unsigned int row = 0; row < MEM_ROWS; row++){
+        for(unsigned int col = 0; col < WORD_SIZE; col++){
             memory[row][col] = '0';
         }
         memory[row][WORD_SIZE] = '\0';
     }
 
-    for(int row = 0; row < NUM_REG; row++){
-        for(int col = 0; col < WORD_SIZE; col++){
+    for(unsigned int row = 0; row < NUM_REG; row++){
+        for(unsigned int col = 0; col < WORD_SIZE; col++){
             regFile[row][col] = '0';
         }
         regFile[row][WORD_SIZE] = '\0';
     }
 
-    for(int i = 0; i < LABEL_MAX; i++){
+    for(short i = (LABEL_MAX - 1); i > 0; i--){
         labels[i].labelName = NULL;
-        labels[i].offsets[i] = 0;
+        for(short j = MAX_OFFSET - 1; j > 0; j--){
+            labels[i].offsets[j] = 0;
+        }
     }
+
 }
 
 void freeMemory() {

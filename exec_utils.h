@@ -7,6 +7,8 @@
 
 #include "cpu_utils.h"
 
+#define MAX_OFFSET 15
+
 typedef struct exec_info{
     int heap_ptr;
     int stack_ptr;
@@ -15,7 +17,7 @@ typedef struct exec_info{
 
 typedef struct label_info{
     int lineNum;
-    int offsets[15];
+    int offsets[MAX_OFFSET];
     char *labelName;
 }LABEL_INFO;
 

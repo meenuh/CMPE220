@@ -67,7 +67,7 @@ void loadAndStoreInstrs(char *fileName, EXEC_INFO *info){
     fp = fopen(fileName, "r");
     if(fp == NULL) {
         printf("Error opening file %s", fileName);
-        exit;
+        exit(1);
     }
 
     preprocessFile(fp);
@@ -551,7 +551,7 @@ char* mulBinary(char* left, char* right, int size, int setFlags)
 
     long result = 0;
 
-    if((op1 == INT_MIN && (op2 != 0 && op2 != 1)) || (op2 == INT_MIN && (op1 != 0 && op1 != 1)) && setFlags) { //very small # is a very large unsigned #
+    if((op1 == INT_MIN && (op2 != 0 && op2 != 1)) || ((op2 == INT_MIN && (op1 != 0 && op1 != 1)) && setFlags)) { //very small # is a very large unsigned #
         flags[OVERFLOW_FLAG] = '1';
         printf("OVERFLOW ON INSTRUCTION\n");
     }else {
@@ -1115,13 +1115,12 @@ void mallocErrorCheck(char *ptr){
 void printExecutionData(int instrNum){
     char instrBuilder[250];
     char *instrFromMem = memory[TEXT_SEGMENT + instrNum];
-    char rs[RTYPE_ADDR_SIZE + 1], rt[RTYPE_ADDR_SIZE + 1], rd[RTYPE_RD_SIZE + 1], imm[IMM_SIZE + 1];
+    char rs[RTYPE_ADDR_SIZE + 1], rt[RTYPE_ADDR_SIZE + 1], imm[IMM_SIZE + 1];
 
     char *freeHandle = NULL;
 
     rs[RTYPE_ADDR_SIZE] = '\0';
     rt[RTYPE_ADDR_SIZE] = '\0';
-    rd[RTYPE_RD_SIZE] = '\0';
     imm[IMM_SIZE] = '\0';
 
     if(strncmp(LW, instrFromMem, OPCODE_SIZE) == 0) {
@@ -1260,16 +1259,15 @@ char *buildInstrForBranchTypePrint(char *instr, char *instrName) {
 
     printf("instruction in print %s\n", instr);
 
-    for(unsigned int i = 0; i < LABEL_MAX; i++){
-        if((labels[i].labelName != NULL)) {
-            printf("label is %s %s %d\n", labels[i].labelName, instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, IMM_SIZE));
+    for(unsigned int i = 0; ((i < LABEL_MAX) && (labels[i].labelName)); i++){
+       // if(labels[i].labelName) {
             for(unsigned int j = 0; j < 15; j++) {
                 if(labels[i].offsets[j] == signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, IMM_SIZE)){
                     strcpy(label, labels[i].labelName);
                     break;
                 }
             }
-        }
+      //  }
     }
 
     sprintf(instrBuilder, "%s $%d, $%d, %s", instrName, binaryToDecimal(left, REG_ADDR_SIZE), binaryToDecimal(right, REG_ADDR_SIZE), label);
@@ -1283,13 +1281,12 @@ char *buildInstrForBranchTypePrint(char *instr, char *instrName) {
  * Utility function for printing for R type instructions
  */
 char *buildInstrForRTypePrint(char *instr, char *instrName){
-    char rs[RTYPE_ADDR_SIZE + 1], rt[RTYPE_ADDR_SIZE + 1], rd[RTYPE_RD_SIZE + 1], imm[IMM_SIZE + 1];
+    char rs[RTYPE_ADDR_SIZE + 1], rt[RTYPE_ADDR_SIZE + 1], rd[RTYPE_RD_SIZE + 1];
     char instrBuilder[250];
 
     rs[RTYPE_ADDR_SIZE] = '\0';
     rt[RTYPE_ADDR_SIZE] = '\0';
     rd[RTYPE_ADDR_SIZE] = '\0';
-    imm[IMM_SIZE] = '\0';
 
     strncpy(rd, instr + OPCODE_SIZE, 10);
     strncpy(rs, instr + OPCODE_SIZE + 10, 8);
