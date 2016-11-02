@@ -18,13 +18,19 @@ char flags[WORD_SIZE + 1];
 
 char *memory[MEM_ROWS]; //64kb mem
 char *regFile[NUM_REG];
-char returnAddr[PC_SIZE + 1];
 
 LABEL_INFO labels[5];
 
 int main(int argc, char **argv)
 {
     char *sourceCode;
+
+    for(short i = (LABEL_MAX - 1); i >= 0; i--){
+        labels[i].labelName = NULL;
+        for(short j = MAX_OFFSET - 1; j >= 0; j--){
+            labels[i].offsets[j] = 0;
+        }
+    }
 
     //must malloc separately since we can't alloc more than 64kb in one go
     for(int i = 0; i < MEM_ROWS; i++){
@@ -50,14 +56,14 @@ int main(int argc, char **argv)
 //    2- t0
 //    1 - a0 value to search for
     //5
-    strcpy(memory[HEAP_SEGMENT], "00000000000000000000000000000010");
+    strcpy(memory[HEAP_SEGMENT],     "00000000000000000000000000000010");
     strcpy(memory[HEAP_SEGMENT + 1], "00000000000000000000000000000110");
     strcpy(memory[HEAP_SEGMENT + 2], "00000000000000000000000000000111");
     strcpy(memory[HEAP_SEGMENT + 3], "00000000000000000000000000001001");
     strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
 
     strcpy(regFile[7], "00000000000000001111100111111111"); //SP
-    strcpy(regFile[5], "00000000000000000000001010011010");
+    strcpy(regFile[5], "00000000000000000000000000000101");
     strcpy(regFile[4], "00000000000000000000001010010101");
     strcpy(regFile[1], "00000000000000000000000000000110");
 
@@ -91,7 +97,6 @@ void init() {
     memAddr[WORD_SIZE] = '\0';
     memData[WORD_SIZE] = '\0';
     instrReg[WORD_SIZE] = '\0';
-    returnAddr[PC_SIZE] = '\0';
 
     for(unsigned int i = 0; i < WORD_SIZE; i++) {
         flags[i] = '0';
@@ -112,13 +117,6 @@ void init() {
             regFile[row][col] = '0';
         }
         regFile[row][WORD_SIZE] = '\0';
-    }
-
-    for(short i = (LABEL_MAX - 1); i > 0; i--){
-        labels[i].labelName = NULL;
-        for(short j = MAX_OFFSET - 1; j > 0; j--){
-            labels[i].offsets[j] = 0;
-        }
     }
 
 }

@@ -50,6 +50,8 @@
 #define MUL_OP 4
 #define ADDI_OP 5
 
+//TODO add JR instruction
+
 //WORD_SIZE + 1 for /0 for debugging and printing
 extern char *memory[MEM_ROWS]; //64kb mem
 extern char *regFile[NUM_REG];
@@ -59,8 +61,6 @@ extern char memAddr[WORD_SIZE + 1];
 extern char memData[WORD_SIZE + 1];
 extern char instrReg[WORD_SIZE + 1];
 extern char flags[WORD_SIZE + 1];
-
-extern char returnAddr[PC_SIZE + 1];
 
 extern LABEL_INFO labels[5];
 
