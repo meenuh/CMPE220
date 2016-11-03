@@ -192,9 +192,7 @@ char *convertInstrToBin(char *instr, int currMemLoc) {
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genRTypeInstr(tokens));
     } else if (strcmp(tokens[0], "lea") == 0) {
         strcpy(binInstr, LEA);
-        strcat(binInstr, freeHandle = decimalToBinary(atoi(tokens[1] + 1), RTYPE_RD_SIZE));
-        free(freeHandle);
-        strcat(binInstr, freeHandle = decimalToBinary(atoi(tokens[2]), IMM_SIZE));
+        strcpy(binInstr + OPCODE_SIZE, freeHandle = genLDSTbinInstr(tokens));
     }
 
     binInstr[WORD_SIZE] = '\0';
@@ -502,7 +500,11 @@ char *addBinary (char *opLeft, char *opRight, int size, int setFlags){
     if(setFlags) {
         if (carry == '1' && setFlags != 2) {
             flags[OVERFLOW_FLAG] = '1';
-        }else flags[OVERFLOW_FLAG] = '0';
+            flags[CARRY_FLAG] = '1';
+        }else{
+            flags[OVERFLOW_FLAG] = '0';
+            flags[CARRY_FLAG] = '0';
+        }
 
         for (int i = 0; i < WORD_SIZE; i++) {
             if (sum[i] == '1') {
@@ -930,15 +932,15 @@ void runProgram(EXEC_INFO info){
                 jumpOrBra = false; //branch was not taken
             }
         } else if(strncmp(BEQ, instr, OPCODE_SIZE) == 0) {
-
+            printf("bne");
             jumpOrBra = true;
             int leftReg = binaryToDecimal(instr + OPCODE_SIZE, REG_ADDR_SIZE);
             int rightReg = binaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
 
             char *compResult = ALU(SUB_OP, regFile[leftReg], regFile[rightReg], WORD_SIZE, 1);
 
-            if(flags[ZERO_FLAG] == '1') {
-           // if(binaryToDecimal(regFile[leftReg], WORD_SIZE) == binaryToDecimal(regFile[rightReg], WORD_SIZE)){
+            //if(flags[ZERO_FLAG] == '1') {
+            if(binaryToDecimal(regFile[leftReg], WORD_SIZE) == binaryToDecimal(regFile[rightReg], WORD_SIZE)){
                 addr = signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE , IMM_SIZE)+1;
                 int currPC = binaryToDecimal(PC, PC_SIZE) + addr;
                 strcpy(PC, freeHandle = decimalToBinary(currPC, PC_SIZE)); //move to next instruction
@@ -948,7 +950,7 @@ void runProgram(EXEC_INFO info){
             free(compResult);
 
         } else if(strncmp(BNE, instr, OPCODE_SIZE) == 0) {
-
+            printf("branching");
             jumpOrBra = true;
             int leftReg = binaryToDecimal(instr + OPCODE_SIZE, REG_ADDR_SIZE);
             int rightReg = binaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
@@ -990,10 +992,41 @@ void runProgram(EXEC_INFO info){
             jumpOrBra = true;
         } else if(strncmp(LEA, instr, OPCODE_SIZE) == 0) {
 
-            int dest = binaryToDecimal(instr + OPCODE_SIZE, RTYPE_RD_SIZE);
-            int effAddr = binaryToDecimal(instr + OPCODE_SIZE + RTYPE_RD_SIZE, IMM_SIZE);
-            strcpy(regFile[dest], freeHandle = decimalToBinary(effAddr, WORD_SIZE));
-            free(freeHandle);
+            // $reg, distance(base, index, scale) 5 7 5 5 4
+            int rdOffset = OPCODE_SIZE;
+            int distanceOffset = OPCODE_SIZE + REG_ADDR_SIZE;
+            int baseOffset = distanceOffset + DIST_SIZE;
+            int indexOffset = baseOffset + REG_ADDR_SIZE;
+            int scaleOffset = indexOffset + REG_ADDR_SIZE;
+
+            char dist[DIST_SIZE + 1];
+            char base[REG_ADDR_SIZE + 1];
+            char index[REG_ADDR_SIZE + 1];
+            char scale[SCALE_SIZE + 1];
+
+            dist[DIST_SIZE] = '\0';
+            base[REG_ADDR_SIZE] = '\0';
+            index[REG_ADDR_SIZE] = '\0';
+            scale[SCALE_SIZE] = '\0';
+            rd[REG_ADDR_SIZE] = '\0';
+
+            //get register addresses and offset value from instruction memory
+            strncpy(rd, instr + rdOffset, REG_ADDR_SIZE);
+            strncpy(dist, instr + distanceOffset, DIST_SIZE);
+            strncpy(base, instr + baseOffset, REG_ADDR_SIZE);
+            strncpy(index, instr + indexOffset, REG_ADDR_SIZE);
+            strncpy(scale, instr + scaleOffset, SCALE_SIZE);
+
+            //calculate address
+            int distVal = binaryToDecimal(dist, DIST_SIZE);
+            int baseVal = binaryToDecimal(regFile[binaryToDecimal(base, REG_ADDR_SIZE)], WORD_SIZE);
+            int indexVal = binaryToDecimal(regFile[binaryToDecimal(index, REG_ADDR_SIZE)], WORD_SIZE);
+            int scaleVal = binaryToDecimal(scale, SCALE_SIZE);
+
+            int effAddr = distVal + baseVal + (indexVal * scaleVal);
+
+            //store in destination reg
+            strcpy(regFile[binaryToDecimal(rd, REG_ADDR_SIZE)], decimalToBinary(effAddr, WORD_SIZE));
         }
 
         if(strcmp(instr, "00000000000000000000000000000000") != 0)
@@ -1245,14 +1278,18 @@ void printExecutionData(int instrNum){
         strcpy(instrBuilder, "JR ");
         strcat(instrBuilder, "$6");
     }else if(strncmp(LEA, instrFromMem, OPCODE_SIZE) == 0) {
-        char source[RTYPE_ADDR_SIZE + 1], effAddr[IMM_SIZE + 1];
-        source[RTYPE_ADDR_SIZE] = '\0';
-        effAddr[IMM_SIZE] = '\0';
+        char indexReg[REG_ADDR_SIZE + 1], baseReg[REG_ADDR_SIZE + 1], distance[DIST_SIZE + 1], scale[SCALE_SIZE + 1], dest[REG_ADDR_SIZE + 1];
 
-        strncpy(source, instrFromMem + OPCODE_SIZE, RTYPE_RD_SIZE);
-        strncpy(effAddr, instrFromMem + OPCODE_SIZE + RTYPE_RD_SIZE, IMM_SIZE);
+        indexReg[REG_ADDR_SIZE] = '\0', baseReg[REG_ADDR_SIZE] = '\0', distance[7] = '\0', scale[3] = '\0', dest[REG_ADDR_SIZE] = '\0'; //null terminate our strings
 
-        sprintf(instrBuilder, "%s $%d, %d", "LEA", binaryToDecimal(source, RTYPE_RD_SIZE), binaryToDecimal(effAddr, IMM_SIZE));
+        // $reg, distance(base, index, scale)
+        strncpy(dest, instrFromMem + OPCODE_SIZE, REG_ADDR_SIZE);
+        strncpy(distance, instrFromMem + OPCODE_SIZE + REG_ADDR_SIZE, DIST_SIZE);
+        strncpy(baseReg, instrFromMem + OPCODE_SIZE + REG_ADDR_SIZE + DIST_SIZE, REG_ADDR_SIZE);
+        strncpy(indexReg, instrFromMem + OPCODE_SIZE + REG_ADDR_SIZE + DIST_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
+        strncpy(scale, instrFromMem + OPCODE_SIZE + REG_ADDR_SIZE + 7 + REG_ADDR_SIZE + REG_ADDR_SIZE, 3);
+        sprintf(instrBuilder, "%s $%d, %d($%d, $%d, %d)", "LEA", binaryToDecimal(dest, REG_ADDR_SIZE), binaryToDecimal(distance, 7), binaryToDecimal(baseReg, REG_ADDR_SIZE),
+                binaryToDecimal(indexReg, REG_ADDR_SIZE), binaryToDecimal(scale, 4));
     }
 
     printf("%-30s %-40s %-30s\n", "Instruction", "Binary representation", "Program Counter");

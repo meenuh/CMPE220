@@ -38,6 +38,7 @@
 #define BOOT_ADDR "0000000000000000"
 
 //flag defines
+#define CARRY_FLAG 3
 #define SIGN_FLAG 2
 #define OVERFLOW_FLAG 1
 #define ZERO_FLAG 0
@@ -75,8 +76,6 @@ char *mulBinary(char* left, char* right, int size, int setFlags);
 char *modBinary(char *left, char *right, int size, int setFlags);
 char *divBinary(char *left, char *right, char **remainder, int size, int setFlags);
 char *addImmBinary(char *opLeft, char *opRight, int size, int setFlags);
-
-//todo add LEA
 
 char *leftShift(char* input, int size);
 char *rightShift(char* input, int size);

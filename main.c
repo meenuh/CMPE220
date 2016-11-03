@@ -55,6 +55,8 @@ int main(int argc, char **argv)
     strcpy(regFile[7], "00000000000000001111100111111111"); //SP
     strcpy(regFile[6], "00000000000000000000000000000001"); //RA
     strcpy(regFile[4], "00000000000000000000001010010101"); //starting array addr
+    strcpy(regFile[5], "11111111111111111111111111111111");
+    strcpy(regFile[3], "00000000000000000000000000000101");
 
     //UNCOMMENT FOR search even number elements - value exists
     //strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
