@@ -14,7 +14,7 @@ const char *ADDI = "100101";
 const char *DIVI = "100110";
 const char *SUBI = "101001";
 
-const char *BLT = "100110";
+const char *BLT = "101110";
 const char *BEQ = "100111";
 const char *BNE = "101000";
 
@@ -24,6 +24,7 @@ const char *SUB = "000010";
 const char *MUL = "000011";
 const char *DIV = "000100";
 const char *MOD = "000101";
+const char *JR = "000110";
 
 //J Types
 const char *J = "010000";

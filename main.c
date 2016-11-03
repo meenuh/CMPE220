@@ -60,18 +60,34 @@ int main(int argc, char **argv)
     strcpy(memory[HEAP_SEGMENT + 1], "00000000000000000000000000000110");
     strcpy(memory[HEAP_SEGMENT + 2], "00000000000000000000000000000111");
     strcpy(memory[HEAP_SEGMENT + 3], "00000000000000000000000000001001");
-    strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
+    //strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
+    strcpy(memory[0], "00000000000000000000000000000001");
 
     strcpy(regFile[7], "00000000000000001111100111111111"); //SP
-    strcpy(regFile[5], "00000000000000000000000000000101");
+    strcpy(regFile[6], "00000000000000000000000000000001");
+    strcpy(regFile[5], "00000000000000000000000000000100");
     strcpy(regFile[4], "00000000000000000000001010010101");
-    strcpy(regFile[1], "00000000000000000000000000000110");
+    strcpy(regFile[1], "00000000000000000000000000000010");
 
 
     EXEC_INFO info = initCPU(); //need to init the PC
     sourceCode = checkAndGetArg(argc, argv);
     loadAndStoreInstrs(sourceCode, &info);
     runProgram(info);
+
+    if(strcmp(regFile[1], regFile[2]) == 0) {
+        printf("found the value %s at memory location %d\n", regFile[2], binaryToDecimal(regFile[3], WORD_SIZE));
+    }
+
+/*    for(int i = 0; i < LABEL_MAX; i++){
+        if(labels[i].labelName != NULL){
+            printf("label %s\n", labels[i].labelName);
+            for(int j = 0; j < MAX_OFFSET; j++){
+                printf("offset is %d\n", labels[i].offsets[j]);
+            }
+
+        }
+    }*/
     freeMemory();
     return 0;
 }
