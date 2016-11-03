@@ -160,6 +160,7 @@ char *convertInstrToBin(char *instr, int currMemLoc) {
     } else if (strcmp(tokens[0], "addi") == 0) {
         strcpy(binInstr, ADDI);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genITypeInstr(tokens));
+
     } else if (strcmp(tokens[0], "subi") == 0) {
         strcpy(binInstr, SUBI);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genITypeInstr(tokens));
@@ -695,7 +696,6 @@ void runProgram(EXEC_INFO info){
         result = NULL;
         jumpOrBra = false;
         addr = 0;
-
         imm[IMM_SIZE] = '\0';
         rd[REG_ADDR_SIZE] = '\0';
         rs[REG_ADDR_SIZE] = '\0';
@@ -704,11 +704,9 @@ void runProgram(EXEC_INFO info){
         //clear out memAddr and memData for instructions not using memory
         strcpy(memAddr, "00000000000000000000000000000000");
         strcpy(memData, "00000000000000000000000000000000");
-
         //fetch instr from mem
         memLoc = binaryToDecimal(PC, PC_SIZE);
         strcpy(instr, memory[memLoc]);
-
         // $t = MEM[$s + offset]
         if (strncmp(LW, instr, OPCODE_SIZE) == 0) { //LOAD WORD
             int rsOffset = OPCODE_SIZE;
@@ -932,7 +930,7 @@ void runProgram(EXEC_INFO info){
                 jumpOrBra = false; //branch was not taken
             }
         } else if(strncmp(BEQ, instr, OPCODE_SIZE) == 0) {
-            printf("bne");
+
             jumpOrBra = true;
             int leftReg = binaryToDecimal(instr + OPCODE_SIZE, REG_ADDR_SIZE);
             int rightReg = binaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
@@ -950,13 +948,14 @@ void runProgram(EXEC_INFO info){
             free(compResult);
 
         } else if(strncmp(BNE, instr, OPCODE_SIZE) == 0) {
-            printf("branching");
             jumpOrBra = true;
             int leftReg = binaryToDecimal(instr + OPCODE_SIZE, REG_ADDR_SIZE);
             int rightReg = binaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
 
             char *compResult = ALU(SUB_OP, regFile[leftReg], regFile[rightReg], WORD_SIZE, 1);
-            if(flags[ZERO_FLAG] == '0') {
+
+            if(binaryToDecimal(regFile[leftReg], WORD_SIZE) != binaryToDecimal(regFile[rightReg], WORD_SIZE)){
+           // if(flags[ZERO_FLAG] == '0') {
                 addr = signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE , IMM_SIZE)+1;
                 int currPC = binaryToDecimal(PC, PC_SIZE) + addr;
                 strcpy(PC, freeHandle = decimalToBinary(currPC, PC_SIZE)); //move to next instruction

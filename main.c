@@ -53,14 +53,12 @@ int main(int argc, char **argv)
     strcpy(memory[HEAP_SEGMENT + 3], "00000000000000000000000000001001");
 
     strcpy(regFile[7], "00000000000000001111100111111111"); //SP
-    strcpy(regFile[6], "00000000000000000000000000000001"); //RA
+    strcpy(regFile[6], "00000000000000000000000000000000"); //RA
     strcpy(regFile[4], "00000000000000000000001010010101"); //starting array addr
-    strcpy(regFile[5], "11111111111111111111111111111111");
-    strcpy(regFile[3], "00000000000000000000000000000101");
 
     //UNCOMMENT FOR search even number elements - value exists
-    //strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
-    //strcpy(regFile[1], "00000000000000000000000000000010"); //exists - value we are looking for
+    strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
+    //strcpy(regFile[1], "00000000000000000000000000000111"); //exists - value we are looking for
 
     //UNCOMMENT FOR search even number elements - value doesn't exist
     //strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
@@ -82,11 +80,11 @@ int main(int argc, char **argv)
     runProgram(info);
 
     //UNCOMMENT FOR BINARY SEARCH RESULT
-/*    if(strcmp(regFile[1], regFile[2]) == 0) {
+    if(strcmp(regFile[1], regFile[2]) == 0) {
         printf("found the value %s at memory location %d\n", regFile[2], binaryToDecimal(regFile[3], WORD_SIZE));
     }else {
         printf("value was not in the array\n");
-    }*/
+    }
 
     freeMemory();
     return 0;
