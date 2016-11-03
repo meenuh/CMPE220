@@ -17,6 +17,7 @@ const char *SUBI = "101001";
 const char *BLT = "101110";
 const char *BEQ = "100111";
 const char *BNE = "101000";
+const char *LEA = "110000";
 
 //R Types and functions
 const char *ADD = "000001";

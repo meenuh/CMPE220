@@ -47,47 +47,45 @@ int main(int argc, char **argv)
 
     init();
 
-    //for testing
-//    7 - SP
-//    6 - RA
-//    5 - last address - a2
-//    4 - first addr  - a1
-//    3 - v0
-//    2- t0
-//    1 - a0 value to search for
-    //5
     strcpy(memory[HEAP_SEGMENT],     "00000000000000000000000000000010");
     strcpy(memory[HEAP_SEGMENT + 1], "00000000000000000000000000000110");
     strcpy(memory[HEAP_SEGMENT + 2], "00000000000000000000000000000111");
     strcpy(memory[HEAP_SEGMENT + 3], "00000000000000000000000000001001");
-    //strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
-    strcpy(memory[0], "00000000000000000000000000000001");
 
     strcpy(regFile[7], "00000000000000001111100111111111"); //SP
-    strcpy(regFile[6], "00000000000000000000000000000001");
-    strcpy(regFile[5], "00000000000000000000000000000100");
-    strcpy(regFile[4], "00000000000000000000001010010101");
-    strcpy(regFile[1], "00000000000000000000000000000010");
+    strcpy(regFile[6], "00000000000000000000000000000001"); //RA
+    strcpy(regFile[4], "00000000000000000000001010010101"); //starting array addr
 
+    //UNCOMMENT FOR search even number elements - value exists
+    //strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
+    //strcpy(regFile[1], "00000000000000000000000000000010"); //exists - value we are looking for
+
+    //UNCOMMENT FOR search even number elements - value doesn't exist
+    //strcpy(regFile[5], "00000000000000000000000000000100"); //length 4 - even number
+    //strcpy(regFile[1], "00000000000000000000000000000011"); //doesn't exists - value we are looking for
+
+    //UNCOMMENT FOR search odd number elements - value exists
+    //strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
+    //strcpy(regFile[5], "00000000000000000000000000000101"); //length 5 - odd number
+    //strcpy(regFile[1], "00000000000000000000000000000010"); //exists - value we are looking for
+
+    //UNCOMMENT FOR search odd number elements - value doesn't exist
+    //strcpy(memory[HEAP_SEGMENT + 4], "00000000000000000000000001000001");
+    //strcpy(regFile[5], "00000000000000000000000000000101"); //length 5 - odd number
+    //strcpy(regFile[1], "00000000000000000000000000000011"); //doesn't exists - value we are looking for
 
     EXEC_INFO info = initCPU(); //need to init the PC
     sourceCode = checkAndGetArg(argc, argv);
     loadAndStoreInstrs(sourceCode, &info);
     runProgram(info);
 
-    if(strcmp(regFile[1], regFile[2]) == 0) {
+    //UNCOMMENT FOR BINARY SEARCH RESULT
+/*    if(strcmp(regFile[1], regFile[2]) == 0) {
         printf("found the value %s at memory location %d\n", regFile[2], binaryToDecimal(regFile[3], WORD_SIZE));
-    }
-
-/*    for(int i = 0; i < LABEL_MAX; i++){
-        if(labels[i].labelName != NULL){
-            printf("label %s\n", labels[i].labelName);
-            for(int j = 0; j < MAX_OFFSET; j++){
-                printf("offset is %d\n", labels[i].offsets[j]);
-            }
-
-        }
+    }else {
+        printf("value was not in the array\n");
     }*/
+
     freeMemory();
     return 0;
 }

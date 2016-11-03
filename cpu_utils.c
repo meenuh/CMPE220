@@ -166,7 +166,6 @@ char *convertInstrToBin(char *instr, int currMemLoc) {
     } else if (strcmp(tokens[0], "j") == 0) {
         strcpy(binInstr, J);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genJTypeInstr(tokens, currMemLoc));
-//        printf("in jump %s\n", binInstr);
     } else if (strcmp(tokens[0], "blt") == 0) {
         strcpy(binInstr, BLT);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genBranchTypeInstr(tokens, currMemLoc));
@@ -176,11 +175,9 @@ char *convertInstrToBin(char *instr, int currMemLoc) {
     } else if (strcmp(tokens[0], "divi") == 0) {
         strcpy(binInstr, DIVI);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genITypeInstr(tokens));
-//        printf("in divi %s\n", binInstr);
     } else if (strcmp(tokens[0], "beq") == 0) {
         strcpy(binInstr, BEQ);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genBranchTypeInstr(tokens, currMemLoc));
-//        printf("beq instr %s\n", binInstr);
     } else if(strcmp(tokens[0], "bne") == 0) {
         strcpy(binInstr, BNE);
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genBranchTypeInstr(tokens, currMemLoc));
@@ -193,7 +190,11 @@ char *convertInstrToBin(char *instr, int currMemLoc) {
         tokens[3][2] = '\0';
 
         strcpy(binInstr + OPCODE_SIZE, freeHandle = genRTypeInstr(tokens));
-        printf("instruction %s\n", binInstr);
+    } else if (strcmp(tokens[0], "lea") == 0) {
+        strcpy(binInstr, LEA);
+        strcat(binInstr, freeHandle = decimalToBinary(atoi(tokens[1] + 1), RTYPE_RD_SIZE));
+        free(freeHandle);
+        strcat(binInstr, freeHandle = decimalToBinary(atoi(tokens[2]), IMM_SIZE));
     }
 
     binInstr[WORD_SIZE] = '\0';
@@ -217,7 +218,6 @@ char *genBranchTypeInstr(char **tokens, int currMemLoc) {
     for(int i = 0; i < LABEL_MAX; i++) {
 
         if(strcmp(labels[i].labelName, tokens[3]) == 0) {
-            printf("found the label %s\n", labels[i].labelName);
             int addr;
             if (labels[i].lineNum < currMemLoc) {
                 addr = labels[i].lineNum - (currMemLoc - TEXT_SEGMENT);
@@ -226,12 +226,9 @@ char *genBranchTypeInstr(char **tokens, int currMemLoc) {
             }
 
             for(int j = 0; j < MAX_OFFSET; j++){
-                printf("inner loop %d %d offset val %d\n", i, j, labels[i].offsets[j]);
                if(addr == labels[i].offsets[j])
                     break;
                 if(labels[i].offsets[j] == 0) {
-
-                    printf("adding for label %s offset %d location %d %d offset is %d\n\n", labels[i].labelName, addr, i, j, labels[i].offsets[j]);
                     labels[i].offsets[j] = addr;
                     break;
                 }
@@ -247,7 +244,6 @@ char *genBranchTypeInstr(char **tokens, int currMemLoc) {
     free(leftOp);
     free(rightOp);
     free(targetAddr);
-    printf("ecndoed instr %s\n", encodedInstr);
     return encodedInstr;
 }
 
@@ -471,7 +467,6 @@ char *addImmBinary(char *opLeft, char *opRight, int size, int setFlags){
 char *subBinary(char *opLeft, char *opRight, int size, int setFlags){
     char *right = NULL, *compl = NULL;
 
-    printf("left %s right %s\n", opLeft, opRight);
     // Getting Complement of A Number(The opcode which is on right side)
     compl = decimalToComplementBinary(binaryToDecimal(opRight, size), size);
 
@@ -507,7 +502,6 @@ char *addBinary (char *opLeft, char *opRight, int size, int setFlags){
     if(setFlags) {
         if (carry == '1' && setFlags != 2) {
             flags[OVERFLOW_FLAG] = '1';
-            printf("OVERFLOW ON INSTRUCTION\n");
         }else flags[OVERFLOW_FLAG] = '0';
 
         for (int i = 0; i < WORD_SIZE; i++) {
@@ -564,7 +558,6 @@ char* mulBinary(char* left, char* right, int size, int setFlags)
 
     if((op1 == INT_MIN && (op2 != 0 && op2 != 1)) || ((op2 == INT_MIN && (op1 != 0 && op1 != 1)) && setFlags)) { //very small # is a very large unsigned #
         flags[OVERFLOW_FLAG] = '1';
-        printf("OVERFLOW ON INSTRUCTION\n");
     }else {
         flags[OVERFLOW_FLAG] = '0';
 
@@ -687,19 +680,16 @@ void runProgram(EXEC_INFO info){
     char imm[IMM_SIZE + 1];
 
     char *freeHandle = NULL;
-    bool jumpOrBra = false, firstRun = true;
+    bool jumpOrBra = false;
 
     strcpy(PC, freeHandle = decimalToBinary(TEXT_SEGMENT, PC_SIZE));
     free(freeHandle);
 
     int memLoc = 0, immOffset = 0, addr = 0;
     char *result;
-    printf("number of lines %d\n", info.lines);
     unsigned int i = 0;
 
     while(i < info.lines){
-  //  for(int i = 0; i < info.lines; i++) {
-        printf("I VALUE IS %d\n", i);
         result = NULL;
         jumpOrBra = false;
         addr = 0;
@@ -946,18 +936,15 @@ void runProgram(EXEC_INFO info){
             int rightReg = binaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
 
             char *compResult = ALU(SUB_OP, regFile[leftReg], regFile[rightReg], WORD_SIZE, 1);
-            printf("comp result %s %s %s\n", regFile[leftReg], regFile[rightReg], compResult);
 
-           // if(flags[ZERO_FLAG] == '1') {
-            if(binaryToDecimal(regFile[leftReg], WORD_SIZE) == binaryToDecimal(regFile[rightReg], WORD_SIZE)){
+            if(flags[ZERO_FLAG] == '1') {
+           // if(binaryToDecimal(regFile[leftReg], WORD_SIZE) == binaryToDecimal(regFile[rightReg], WORD_SIZE)){
                 addr = signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE , IMM_SIZE)+1;
                 int currPC = binaryToDecimal(PC, PC_SIZE) + addr;
                 strcpy(PC, freeHandle = decimalToBinary(currPC, PC_SIZE)); //move to next instruction
-                printf("PC after beq %d instr %s\n", binaryToDecimal(PC, PC_SIZE), memory[binaryToDecimal(PC, PC_SIZE)]);
 
                 free(freeHandle);
             }else jumpOrBra = false;
-            printf("PC VAL %s\n", PC);
             free(compResult);
 
         } else if(strncmp(BNE, instr, OPCODE_SIZE) == 0) {
@@ -992,18 +979,23 @@ void runProgram(EXEC_INFO info){
             strcpy(PC, freeHandle = decimalToBinary(currPC, PC_SIZE)); //move to next instruction
             free(freeHandle);
         } else if(strncmp(JR, instr, OPCODE_SIZE) == 0) {
-            //int regAddr = binaryToDecimal(instr + OPCODE_SIZE + 21, REG_ADDR_SIZE);
             int instrAddr = binaryToDecimal(regFile[6], WORD_SIZE);
             int currAddr = binaryToDecimal(PC, PC_SIZE);
 
             int offset = instrAddr - currAddr;
 
-            printf("offset is %d curr %d instraddr %d\n", offset, currAddr, instrAddr);
             addr = offset;
 
             strcpy(PC, regFile[6] + PC_SIZE);
             jumpOrBra = true;
+        } else if(strncmp(LEA, instr, OPCODE_SIZE) == 0) {
+
+            int dest = binaryToDecimal(instr + OPCODE_SIZE, RTYPE_RD_SIZE);
+            int effAddr = binaryToDecimal(instr + OPCODE_SIZE + RTYPE_RD_SIZE, IMM_SIZE);
+            strcpy(regFile[dest], freeHandle = decimalToBinary(effAddr, WORD_SIZE));
+            free(freeHandle);
         }
+
         if(strcmp(instr, "00000000000000000000000000000000") != 0)
             printExecutionData(i);
 
@@ -1015,8 +1007,6 @@ void runProgram(EXEC_INFO info){
             i += addr;
         }
 
-        firstRun = false;
-        printf("i at bottom %d\n", i);
         if(result != NULL)
             free(result);
     } //end for
@@ -1216,7 +1206,6 @@ void printExecutionData(int instrNum){
         free(freeHandle);
     }else if(strncmp(J, instrFromMem, OPCODE_SIZE) == 0) {
         strcpy(instrBuilder, "J ");
-        printf("instr from mem %s\n", instrFromMem);
         for(int i = 0; i < LABEL_MAX; i++){
 
             if((labels[i].labelName != NULL)) {
@@ -1240,7 +1229,6 @@ void printExecutionData(int instrNum){
         free(freeHandle);
     }else if(strncmp(JAL, instrFromMem, OPCODE_SIZE) == 0) {
         strcpy(instrBuilder, "JAL ");
-        printf("instr from mem %s\n", instrFromMem);
         for(int i = 0; i < LABEL_MAX; i++){
 
             if((labels[i].labelName != NULL)) {
@@ -1256,7 +1244,15 @@ void printExecutionData(int instrNum){
     }else if(strncmp(JR, instrFromMem, OPCODE_SIZE) == 0) {
         strcpy(instrBuilder, "JR ");
         strcat(instrBuilder, "$6");
-        printf("instr is %s\n", instrBuilder);
+    }else if(strncmp(LEA, instrFromMem, OPCODE_SIZE) == 0) {
+        char source[RTYPE_ADDR_SIZE + 1], effAddr[IMM_SIZE + 1];
+        source[RTYPE_ADDR_SIZE] = '\0';
+        effAddr[IMM_SIZE] = '\0';
+
+        strncpy(source, instrFromMem + OPCODE_SIZE, RTYPE_RD_SIZE);
+        strncpy(effAddr, instrFromMem + OPCODE_SIZE + RTYPE_RD_SIZE, IMM_SIZE);
+
+        sprintf(instrBuilder, "%s $%d, %d", "LEA", binaryToDecimal(source, RTYPE_RD_SIZE), binaryToDecimal(effAddr, IMM_SIZE));
     }
 
     printf("%-30s %-40s %-30s\n", "Instruction", "Binary representation", "Program Counter");
@@ -1281,12 +1277,10 @@ char *buildInstrForBranchTypePrint(char *instr, char *instrName) {
     strncpy(left, instr + OPCODE_SIZE, REG_ADDR_SIZE);
     strncpy(right, instr + OPCODE_SIZE + REG_ADDR_SIZE, REG_ADDR_SIZE);
     int offset = signedBinaryToDecimal(instr + OPCODE_SIZE + REG_ADDR_SIZE + REG_ADDR_SIZE, IMM_SIZE);
-    printf("offset is %d\n", offset);
 
     for(unsigned int i = 0; ((i < LABEL_MAX) && (labels[i].labelName)); i++){
             for(unsigned int j = 0; j < MAX_OFFSET; j++) {
                 if(labels[i].offsets[j] == offset){
-                    printf("FOUND IT\n");
                     strcpy(label, labels[i].labelName);
                     break;
                 }
